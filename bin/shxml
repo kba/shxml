@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# BEGIN-INCLUDE LICENSE-header
+# END-INCLUDE
+
+SHAREDIR="$(dirname "$0")/.."
+source "$SHAREDIR/common.sh"
+export PATH="$(dirname "$0"):$PATH"
+
+usage() {
+    local error binary="$(basename "$0")"
+    if [[ ! -z "$1" ]];then
+        error=
+    fi
+    echo "$binary <command> [options] <arguments>
+    $error
+    Commands:
+    "
+    for subcommand in $(compgen -c "$binary-");do
+        # echo printf "%s %s - %s" "$binary" "${subcommand#$binary-}" "$($binary --synopsis)"
+        printf "        %s - %s" "${subcommand#$binary-}" "$($subcommand --synopsis)"
+    done
+    echo
+    # Run '$binary <command> --help to get command-specific help
+    # "
+}
+
+## ## OPTIONS
+##
+parse_options() {
+    while [[ "$1" = -?* ]];do
+        case "$1" in
+            ## ### -h, --help
+            ##
+            ## Show help
+            ##
+            -h|--help) usage ""; exit ;;
+            *) usage "Unknown option '$1'"; exit 1 ;;
+        esac
+        shift
+    done
+}
+
+parse_command() {
+    if [[ -z "$1" ]];then
+        usage ""
+        exit
+    fi
+    case "$1" in
+        transform|query|validate)
+            cmd="$1"
+            shift
+            exec "${0}-$cmd" "$@"
+            ;;
+        *)
+            usage "No such command: '$1'"
+            ;;
+    esac
+}
+
+parse_options "$@"
+parse_command "$@"
