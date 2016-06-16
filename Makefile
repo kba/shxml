@@ -63,3 +63,6 @@ install: build jar README.md $(SCRIPT)
 		LICENSE \
 		README.md \
 		saxon9he.jar
+
+check:
+	which unzip wget

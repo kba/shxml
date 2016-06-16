@@ -3,26 +3,26 @@
 # BEGIN-INCLUDE LICENSE-header
 # END-INCLUDE
 
-SHAREDIR="$(dirname "$0")/.."
-source "$SHAREDIR/common.sh"
-export PATH="$(dirname "$0"):$PATH"
+export SHXMLSHARE SHXMLBINARY SHXMLCOMMANDS
+SHXMLBINARY="$(basename "$0")"
+SHXMLSHARE="$(dirname "$(readlink -f "$0")")/.."
+declare -a SHXMLCOMMANDS
+source "$SHXMLSHARE/lib/common.bash"
+while read -r cmd;do SHXMLCOMMANDS+=("$cmd");done < <(compgen -c "$SHXMLBINARY-")
 
 usage() {
-    local error binary="$(basename "$0")"
+    local error cmd synopses
     if [[ ! -z "$1" ]];then
-        error=
+        error="\n!!\n!! $1 !!\n!!\n"
     fi
-    echo "$binary <command> [options] <arguments>
-    $error
-    Commands:
-    "
-    for subcommand in $(compgen -c "$binary-");do
-        # echo printf "%s %s - %s" "$binary" "${subcommand#$binary-}" "$($binary --synopsis)"
-        printf "        %s - %s" "${subcommand#$binary-}" "$($subcommand --synopsis)"
+    synopses="\n\n"
+    for cmd in "${SHXMLCOMMANDS[@]}";do
+        synopses+="        ${cmd#$SHXMLBINARY-}\t- $($cmd --synopsis)\n"
     done
-    echo
-    # Run '$binary <command> --help to get command-specific help
-    # "
+    echo -e "$SHXMLBINARY <command> [options] <arguments>
+    $error
+    Commands:$synopses
+    Run '$SHXMLBINARY <command> --help to get command-specific help"
 }
 
 ## ## OPTIONS
@@ -46,16 +46,13 @@ parse_command() {
         usage ""
         exit
     fi
-    case "$1" in
-        transform|query|validate)
-            cmd="$1"
-            shift
-            exec "${0}-$cmd" "$@"
-            ;;
-        *)
-            usage "No such command: '$1'"
-            ;;
-    esac
+    local cmd="$SHXMLBINARY-$1"
+    if ! compgen -c "$cmd" >/dev/null;then
+        usage "No such command: '$1'"
+        exit 140
+    fi
+    shift
+    exec "$cmd" "$@"
 }
 
 parse_options "$@"

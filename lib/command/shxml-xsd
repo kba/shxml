@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# BEGIN-INCLUDE LICENSE-header
+# END-INCLUDE
+
+if [[ -z "$SHXMLSHARE" ]];then
+    echo "!! \$SHXMLSHARE not set. Run as '$(echo "$0"|sed -e 's,.*/,,' -e 's,-, ,')' !!"
+    exit 142
+fi
+source "$SHXMLSHARE/lib/common.bash"
+
+BACKENDS=("saxon" "libxml")
+DEFAULT_BACKEND="saxon"
+SYNOPSIS="Validate XML against a schema"
+
+## ## OPTIONS
+##
+parse_options() {
+    while [[ "$1" = -?* ]];do
+        case "$1" in
+            ## ### --synopsis
+            ##
+            ## Show the synopsis of this command
+            ##
+            --synopsis) echo "$SYNOPSIS"; exit ;;
+            --list-backends)
+                _print_list_with_default "$DEFAULT_BACKEND" "${BACKENDS[@]}"
+                exit ;;
+        esac
+        shift
+    done
+}
+
+## ## ARGUMENTS
+##
+parse_arguments() {
+    ## * <xsd> - the XSD schema
+    ##
+    XSLT="$1"
+    if [[ -z "$XSLT" ]];then
+        _error "Must pass XSLT script"
+    elif [[ ! -r "$XSLT" ]];then
+        _error "Cannot read XSLT script '$XSLT'"
+    fi
+    shift
+    ## * [input-file...] - files (or a single dash for stdin) to validate
+    ##
+    declare -a INPUT_FILES
+    _args_input_files_or_stdin "$@"
+    INPUT_FILES=(${_ARGS_INPUT_FILES[@]})
+}
+
+parse_options "$@"
+parse_arguments "$@"
+
+_log 0 "XSD: '$XSD'"
+_log 0 "INPUT_FILES: '${INPUT_FILES[*]}'"

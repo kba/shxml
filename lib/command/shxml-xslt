@@ -1,0 +1,51 @@
+#!/bin/bash
+# BEGIN-INCLUDE LICENSE-header
+# END-INCLUDE
+if [[ -z "$SHXMLSHARE" ]];then
+    echo "!! \$SHXMLSHARE not set. Run as '$(echo "$0"|sed -e 's,.*/,,' -e 's,-, ,')' !!"
+    exit 142
+fi
+source "$SHXMLSHARE/lib/common.bash"
+
+SYNOPSIS="Transform XML with XSLT"
+
+## ## OPTIONS
+##
+parse_options() {
+    while [[ "$1" = -?* ]];do
+        case "$1" in
+            ## ### --synopsis
+            ##
+            ## Show the synopsis of this command
+            ##
+            --synopsis) echo "$SYNOPSIS"; exit ;;
+        esac
+        shift
+    done
+}
+
+## ## ARGUMENTS
+##
+parse_arguments() {
+    ## * <xslt> - the xslt script to use
+    ##
+    XSLT="$1"
+    if [[ -z "$XSLT" ]];then
+        _error "Must pass XSLT script"
+    elif [[ ! -r "$XSLT" ]];then
+        _error "Cannot read XSLT script '$XSLT'"
+    fi
+    shift
+    ## * [input-file...] - input files or a single dash for stdin
+    ##
+    declare -a INPUT_FILES
+    _args_input_files_or_stdin "$@"
+    INPUT_FILES=(${_ARGS_INPUT_FILES[@]})
+}
+
+parse_options "$@"
+parse_arguments "$@"
+
+backend_saxon "net
+_log 0 "XSLT: '$XSLT'"
+_log 0 "INPUT_FILES: '${INPUT_FILES[*]}'"
