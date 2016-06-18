@@ -1,0 +1,44 @@
+#!/bin/bash
+# BEGIN-INCLUDE LICENSE-header
+# END-INCLUDE
+if [[ -z "$SHXMLSHARE" ]];then
+    echo "!! \$SHXMLSHARE not set. Run as 'shxml backend $(basename "$0")' !!"
+    exit 142
+fi
+source "$SHXMLSHARE/lib/common.bash"
+source "$SHXMLSHARE/lib/java.bash"
+
+SYNOPSIS="Run Saxon JAR"
+
+usage() {
+    echo "Usage: $SHXMLBINARY backend saxon -- <command> [args]
+
+    Commands:
+
+        Query       - Query using XQuery
+        Transform   - Transform using XSLT 2.0
+
+    Run '$SHXMLBINARY backend saxon -- <command> -\\?' for command-specific help
+    "
+}
+
+while [[ "$1" != "--" ]];do
+    case "$1" in
+        ## --help
+        --help) usage; exit ;;
+        ## --synopsis
+        --synopsis) echo "$SYNOPSIS"; exit ;;
+        ## --version
+        --version) _shxml_backend "saxon" -- Version; exit;;
+        ## --check-installed
+        --check-installed) _shxml_mark_ok ; exit ;;
+        *) _shxml_error "Unknown option '$1' to $(basename "$0")" ;;
+    esac
+    shift
+done
+shift
+CLASS="net.sf.saxon.$1"; shift
+CLASSPATH="$SHXMLSHARE/jar/saxon9he.jar"
+
+_shxml_log 0 exec "$JAVACMD" "${JVM_OPTS[@]}" -classpath "$CLASSPATH" "$CLASS" "${SAXON_ARGS[@]}"
+exec "$JAVACMD" "${JVM_OPTS[@]}" -classpath "$CLASSPATH" "$CLASS" "$@"

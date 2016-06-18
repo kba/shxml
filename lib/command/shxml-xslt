@@ -7,45 +7,99 @@ if [[ -z "$SHXMLSHARE" ]];then
 fi
 source "$SHXMLSHARE/lib/common.bash"
 
+SHXML_BACKENDS_XSLT=("saxon" "xsltproc" "xalan-cpp" "xalan-j" "xmlstarlet")
 SYNOPSIS="Transform XML with XSLT"
+
+usage() {
+    local error
+    echo "shxml xslt [opts] <xslt> <input-file...>
+    $error
+Options:
+
+    --backend <BACKEND>   Use specific backend <BACKEND>
+    --list-backends       List available backends
+"
+}
 
 ## ## OPTIONS
 ##
-parse_options() {
-    while [[ "$1" = -?* ]];do
-        case "$1" in
-            ## ### --synopsis
-            ##
-            ## Show the synopsis of this command
-            ##
-            --synopsis) echo "$SYNOPSIS"; exit ;;
-        esac
-        shift
-    done
-}
-
-## ## ARGUMENTS
-##
-parse_arguments() {
-    ## * <xslt> - the xslt script to use
-    ##
-    XSLT="$1"
-    if [[ -z "$XSLT" ]];then
-        _error "Must pass XSLT script"
-    elif [[ ! -r "$XSLT" ]];then
-        _error "Cannot read XSLT script '$XSLT'"
-    fi
+while [[ "$1" = -?* ]];do
+    case "$1" in
+        #help:--synopsis:Show the synopsis of this command
+        --synopsis) echo "$SYNOPSIS"; exit ;;
+        --backend) BACKEND="$2"; shift ;;
+        --list-backends)
+            _shxml_backend_check_installed "${SHXML_BACKENDS_XSLT[@]}"
+            exit ;;
+    esac
     shift
-    ## * [input-file...] - input files or a single dash for stdin
-    ##
-    declare -a INPUT_FILES
-    _args_input_files_or_stdin "$@"
-    INPUT_FILES=(${_ARGS_INPUT_FILES[@]})
-}
+done
+if [[ -z "$1" ]];then
+    usage;
+    exit;
+fi
+## ## ARGUMENTS
 
-parse_options "$@"
-parse_arguments "$@"
+##
+## * <xslt> - the xslt script to use
+##
+XSLT="$1"
+if [[ ! -r "$XSLT" ]];then
+    _shxml_error "Cannot read XSLT script '$XSLT'"
+fi
+shift
 
-backend_saxon "net
-_log 0 "XSLT: '$XSLT'"
-_log 0 "INPUT_FILES: '${INPUT_FILES[*]}'"
+## * [input-file...] - input files or a single dash for stdin
+##
+declare -a INPUT_FILES
+_args_input_files_or_stdin "$@"
+INPUT_FILES=("${_ARGS_INPUT_FILES[@]}")
+
+if [[ -z "$BACKEND" ]];then
+    _shxml_backend_determine "$SHXML_BACKEND_XSLT" "${SHXML_BACKENDS_XSLT[@]}"
+fi
+_shxml_log 1 "XSLT BACKEND: '$BACKEND'"
+_shxml_log 1 "XSLT: '$XSLT'"
+_shxml_log 1 "INPUT_FILES: '${INPUT_FILES[*]}'"
+case "$BACKEND" in
+    saxon)
+        typeset -a SAXON_FLAGS SAXON_ARGS
+        for input_file in "${INPUT_FILES[@]}";do
+            _shxml_backend "$BACKEND" -- \
+                "Transform" \
+                "${SAXON_FLAGS[@]}" \
+                -xsl:"$XSLT" \
+                -s:"$input_file" \
+                "${SAXON_ARGS[@]}"
+        done
+        ;;
+    xalan-j)
+        for input_file in "${INPUT_FILES[@]}";do
+            _shxml_backend "$BACKEND" -- \
+                -xsl "$XSLT" \
+                -in "$input_file"
+        done
+        ;;
+    xalan-cpp)
+        for input_file in "${INPUT_FILES[@]}";do
+            _shxml_backend "$BACKEND" -- \
+                -xsl "$XSLT" \
+                -in "$input_file"
+        done
+        ;;
+    xsltproc)
+        for input_file in "${INPUT_FILES[@]}";do
+            _shxml_backend "$BACKEND" -- \
+                "$XSLT" \
+                "$input_file"
+        done
+        ;;
+    xmlstarlet)
+        for input_file in "${INPUT_FILES[@]}";do
+            shxml-backend "$BACKEND" -- \
+                "transform" \
+                "$XSLT" \
+                "$input_file"
+        done
+        ;;
+esac

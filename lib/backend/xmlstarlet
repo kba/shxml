@@ -1,0 +1,32 @@
+#!/bin/bash
+# BEGIN-INCLUDE LICENSE-header
+# END-INCLUDE
+if [[ -z "$SHXMLSHARE" ]];then
+    echo "!! \$SHXMLSHARE not set. Run as 'shxml backend $(basename "$0")' !!"
+    exit 142
+fi
+source "$SHXMLSHARE/lib/common.bash"
+
+SYNOPSIS="Run xmlstarlet"
+
+SHXML_XMLSTARLET="${SHXML_XMLSTARLET:-xmlstarlet}"
+
+while [[ "$1" != "--" ]];do
+    case "$1" in
+        ## ### --synopsis
+        --synopsis) echo "$SYNOPSIS"; exit ;;
+        --check-installed)
+            if [[ -x "$SHXML_XMLSTARLET" ]];then
+                _shxml_mark_ok; exit
+            elif compgen -c "$SHXML_XMLSTARLET" >/dev/null;then
+                _shxml_mark_ok; exit
+            fi
+            _shxml_mark_notok; exit 1
+            ;;
+        *) _shxml_error "Unknown option '$1' to $(basename "$0")" ;;
+    esac
+    shift
+done
+shift
+
+exec "$SHXML_XMLSTARLET" "$@"

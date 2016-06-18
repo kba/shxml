@@ -1,57 +1,81 @@
 #!/bin/bash
-
 # BEGIN-INCLUDE LICENSE-header
 # END-INCLUDE
-
 if [[ -z "$SHXMLSHARE" ]];then
     echo "!! \$SHXMLSHARE not set. Run as '$(echo "$0"|sed -e 's,.*/,,' -e 's,-, ,')' !!"
     exit 142
 fi
 source "$SHXMLSHARE/lib/common.bash"
 
-BACKENDS=("saxon" "libxml")
-DEFAULT_BACKEND="saxon"
-SYNOPSIS="Validate XML against a schema"
+SHXML_BACKENDS_XSD=("xmlstarlet" "xmllint")
+SYNOPSIS="Validate XML against XSD"
+
+usage() {
+    echo "$SHXMLBINARY xsd [opts] <xsd> <input-file...>
+
+Options:
+
+    --backend <BACKEND>   Use specific backend <BACKEND>
+    --list-backends       List available backends
+"
+}
 
 ## ## OPTIONS
 ##
-parse_options() {
-    while [[ "$1" = -?* ]];do
-        case "$1" in
-            ## ### --synopsis
-            ##
-            ## Show the synopsis of this command
-            ##
-            --synopsis) echo "$SYNOPSIS"; exit ;;
-            --list-backends)
-                _print_list_with_default "$DEFAULT_BACKEND" "${BACKENDS[@]}"
-                exit ;;
-        esac
-        shift
-    done
-}
+while [[ "$1" = -?* ]];do
+    case "$1" in
+        #help:--synopsis:Show the synopsis of this command
+        --synopsis) echo "$SYNOPSIS"; exit ;;
+        --backend) BACKEND="$2"; shift ;;
+        --list-backends)
+            _shxml_backend_check_installed "${SHXML_BACKENDS_XSD[@]}"
+            exit ;;
+    esac
+    shift
+done
+if [[ -z "$1" ]];then
+    usage;
+    exit;
+fi
 
 ## ## ARGUMENTS
+
 ##
-parse_arguments() {
-    ## * <xsd> - the XSD schema
-    ##
-    XSLT="$1"
-    if [[ -z "$XSLT" ]];then
-        _error "Must pass XSLT script"
-    elif [[ ! -r "$XSLT" ]];then
-        _error "Cannot read XSLT script '$XSLT'"
-    fi
-    shift
-    ## * [input-file...] - files (or a single dash for stdin) to validate
-    ##
-    declare -a INPUT_FILES
-    _args_input_files_or_stdin "$@"
-    INPUT_FILES=(${_ARGS_INPUT_FILES[@]})
-}
+## * <xsd> - the XSD to validate with
+##
+XSD="$1"
+if [[ ! -r "$XSD" ]];then
+    _shxml_error "Cannot read XSD script '$XSD'"
+fi
+shift
 
-parse_options "$@"
-parse_arguments "$@"
+## * [input-file...] - input files or a single dash for stdin
+##
+declare -a INPUT_FILES
+_args_input_files_or_stdin "$@"
+INPUT_FILES=("${_ARGS_INPUT_FILES[@]}")
 
-_log 0 "XSD: '$XSD'"
-_log 0 "INPUT_FILES: '${INPUT_FILES[*]}'"
+if [[ -z "$BACKEND" ]];then
+    _shxml_backend_determine "$SHXML_BACKEND_XSD" "${SHXML_BACKENDS_XSD[@]}"
+fi
+_shxml_log 1 "XSD BACKEND: '$BACKEND'"
+_shxml_log 1 "XSD: '$XSD'"
+_shxml_log 1 "INPUT_FILES: '${INPUT_FILES[*]}'"
+case "$BACKEND" in
+    xmlstarlet)
+        for input_file in "${INPUT_FILES[@]}";do
+            shxml-backend "$BACKEND" -- \
+                "validate" \
+                "-s" "$XSD" \
+                "$input_file"
+        done
+        ;;
+    xmllint)
+        for input_file in "${INPUT_FILES[@]}";do
+            shxml-backend "$BACKEND" -- \
+                "--noout" \
+                "--schema" "$XSD" \
+                "$input_file"
+        done
+        ;;
+esac

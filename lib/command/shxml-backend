@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# BEGIN-INCLUDE LICENSE-header
+# END-INCLUDE
+
+if [[ -z "$SHXMLSHARE" ]];then
+    echo "!! \$SHXMLSHARE not set. Run as '$(echo "$0"|sed -e 's,.*/,,' -e 's,-, ,')' !!"
+    exit 142
+fi
+source "$SHXMLSHARE/lib/common.bash"
+
+SYNOPSIS="Run a backend directly"
+
+usage() {
+    echo "Usage: $SHXMLBINARY backend <backend> [backend-args...]
+
+    Backends:
+"
+    _shxml_backend_check_installed "${SHXMLBACKENDS[@]}"
+
+    echo "
+    Run '$SHXMLBINARY backend <command> --help to get backend-specific help"
+}
+
+## ## OPTIONS
+##
+while [[ "$1" = -?* ]];do
+    case "$1" in
+        ## ### --synopsis
+        ##
+        ## Show the synopsis of this command
+        ##
+        -h|--help) usage; exit ;;
+        --synopsis) echo "$SYNOPSIS"; exit ;;
+        *) _shxml_error "Unknown option '$1' to $(basename "$0")"; exit ;;
+    esac
+    shift
+done
+
+## ## ARGUMENTS
+##
+## * <xsd> - the XSD schema
+##
+BACKEND="$1"
+if [[ -z "$BACKEND" ]];then
+    usage
+    exit
+elif [[ ! -e "$SHXMLSHARE/lib/backend/$BACKEND" ]] >/dev/null;then
+    _shxml_error "Unknown backend '$BACKEND'"
+fi
+shift
+
+_shxml_log 0 "BACKEND: '$BACKEND'"
+_shxml_log 0 "\$@: " "$@"
+_shxml_backend "$BACKEND" "$@"

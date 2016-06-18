@@ -1,15 +1,16 @@
+SAXON_HE_VERSION = 9.7.0-5
+XALAN_VERSION = 2.7.2
+
 CP = cp -rv
 RM = rm -rfv
 UNZIP = unzip -u
 WGET = wget
 MKDIR = mkdir -p
 
-SAXON_HE_VERSION_MAJOR = 9
-SAXON_HE_VERSION_MINOR = 7
-SAXON_HE_VERSION_PATCH = 0-4J
-SAXON_HE_VERSION = $(SAXON_HE_VERSION_MAJOR).$(SAXON_HE_VERSION_MINOR).$(SAXON_HE_VERSION_PATCH)
-SAXON_HE_ZIP = SaxonHE$(SAXON_HE_VERSION_MAJOR)-$(SAXON_HE_VERSION_MINOR)-$(SAXON_HE_VERSION_PATCH).zip
-SAXON_HE_URL = https://sourceforge.net/projects/saxon/files/Saxon-HE/$(SAXON_HE_VERSION_MAJOR).$(SAXON_HE_VERSION_MINOR)/$(SAXON_HE_ZIP)/download
+MVN_URL = http://central.maven.org/maven2
+SAXON_HE_URL = $(MVN_URL)/net/sf/saxon/Saxon-HE/$(SAXON_HE_VERSION)/Saxon-HE-$(SAXON_HE_VERSION).jar
+XALAN_URL = $(MVN_URL)/xalan/xalan/$(XALAN_VERSION)/xalan-$(XALAN_VERSION).jar
+XALANSER_URL = $(MVN_URL)/xalan/serializer/$(XALAN_VERSION)/serializer-$(XALAN_VERSION).jar
 
 SCRIPT=saxon-cli
 VERSION=0.0.1
@@ -22,16 +23,16 @@ BINARIES += $(shell find bin -type f|sed 's,^,build/,'|sed 's,\.sh$$,,')
 
 .PHONY: README.md
 
-jar: saxon9he.jar
+jar: jar/saxon9he.jar jar/xalan.jar jar/xalan-serializer.jar
 
-# Extract the Saxon JAR
-saxon9he.jar:
-	$(MAKE) $(SAXON_HE_ZIP)
-	$(UNZIP) "$(SAXON_HE_ZIP)" "$@"
+jar/saxon9he.jar:
+	$(MKDIR) jar && $(WGET) -O "$@" "$(SAXON_HE_URL)"
 
-# Download Saxon-HE
-$(SAXON_HE_ZIP):
-	$(WGET) -O "$@" "$(SAXON_HE_URL)"
+jar/xalan.jar:
+	$(MKDIR) jar && $(WGET) -O "$@" "$(XALAN_URL)"
+
+jar/xalan-serializer.jar:
+	$(MKDIR) jar && $(WGET) -O "$@" "$(XALANSER_URL)"
 
 # Remove the compiled file and ZIP
 clean:

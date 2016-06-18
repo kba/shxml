@@ -1,0 +1,26 @@
+#!/bin/bash
+# BEGIN-INCLUDE LICENSE-header
+# END-INCLUDE
+if [[ -z "$SHXMLSHARE" ]];then
+    echo "!! \$SHXMLSHARE not set. Run as 'shxml backend $(basename "$0")' !!"
+    exit 142
+fi
+source "$SHXMLSHARE/lib/common.bash"
+source "$SHXMLSHARE/lib/java.bash"
+
+SYNOPSIS="Run Xalan-J JAR"
+
+while [[ "$1" != "--" ]];do
+    case "$1" in
+        ## --synopsis
+        --synopsis) echo "$SYNOPSIS"; exit ;;
+        ## --check-installed
+        --check-installed) _shxml_mark_ok ; exit ;;
+        *) _shxml_error "Unknown option '$1' to $(basename "$0")" ;;
+    esac
+    shift
+done
+CLASSPATH="$SHXMLSHARE/jar/xalan-serializer.jar:$SHXMLSHARE/jar/xalan.jar"
+
+_shxml_log 0 exec "$JAVACMD" "${JVM_OPTS[@]}" -cp "$SHXMLSHARE/jar/xalan-serializer.jar" -jar "$JAR" "$@"
+exec "$JAVACMD" "${JVM_OPTS[@]}" -cp "$CLASSPATH" "org.apache.xalan.xslt.Process" "$@"
