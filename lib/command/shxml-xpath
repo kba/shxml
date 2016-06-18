@@ -1,0 +1,77 @@
+#!/bin/bash
+# BEGIN-INCLUDE LICENSE-header
+# END-INCLUDE
+if [[ -z "$SHXMLSHARE" ]];then
+    echo "!! \$SHXMLSHARE not set. Run as '$(echo "$0"|sed -e 's,.*/,,' -e 's,-, ,')' !!"
+    exit 142
+fi
+source "$SHXMLSHARE/lib/common.bash"
+
+SHXML_BACKENDS_XPATH=("xmlstarlet" "saxon")
+SYNOPSIS="Run xpath expression"
+
+usage() {
+    echo "$SHXMLBINARY xpath <xpath> <input-file...>
+
+Options:
+
+    --backend <BACKEND>   Use specific backend <BACKEND>
+    --list-backends       List available backends
+"
+}
+
+## ## OPTIONS
+##
+while [[ "$1" = -?* ]];do
+    case "$1" in
+        #help:--synopsis:Show the synopsis of this command
+        --synopsis) echo "$SYNOPSIS"; exit ;;
+        --backend) BACKEND="$2"; shift ;;
+        --list-backends)
+            _shxml_backend_check_installed "${SHXML_BACKENDS_XPATH[@]}"
+            exit ;;
+    esac
+    shift
+done
+if [[ -z "$1" ]];then
+    usage;
+    exit;
+fi
+
+## ## ARGUMENTS
+
+##
+## * <xsd> - the XPATH to validate with
+##
+XPATH="$1"
+shift
+
+## * [input-file...] - input files or a single dash for stdin
+##
+declare -a INPUT_FILES
+_args_input_files_or_stdin "$@"
+INPUT_FILES=("${_ARGS_INPUT_FILES[@]}")
+
+if [[ -z "$BACKEND" ]];then
+    _shxml_backend_determine "$SHXML_BACKEND_XPATH" "${SHXML_BACKENDS_XPATH[@]}"
+fi
+_shxml_log 1 "XPATH BACKEND: '$BACKEND'"
+_shxml_log 1 "XPATH: '$XPATH'"
+_shxml_log 1 "INPUT_FILES: '${INPUT_FILES[*]}'"
+case "$BACKEND" in
+    xmlstarlet)
+        for input_file in "${INPUT_FILES[@]}";do
+            shxml-backend "$BACKEND" -- \
+                "select" \
+                "-t" "-c" "$XPATH" \
+                "$input_file"
+        done
+        ;;
+    saxon)
+        for input_file in "${INPUT_FILES[@]}";do
+            shxml-backend "$BACKEND" -- \
+                "Query" \
+                "-qs:doc('file://$PWD/$input_file')$XPATH"
+        done
+        ;;
+esac

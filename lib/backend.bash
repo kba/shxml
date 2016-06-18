@@ -8,7 +8,7 @@ _shxml_backend() {
 
 _shxml_backend_check_installed() {
     local cmd
-    for cmd in "${SHXMLBACKENDS[@]}";do
+    for cmd in "$@";do
         backends+="       $(_shxml_backend "$cmd" --check-installed)\t${cmd} \t $(_shxml_backend "$cmd" --synopsis)\n"
     done
     echo -e "$backends"|column -ts'	'
