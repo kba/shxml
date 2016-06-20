@@ -11,13 +11,14 @@ SHXML_BACKENDS_XSLT=("saxon" "xsltproc" "xalan-cpp" "xalan-j" "xmlstarlet")
 SYNOPSIS="Transform XML with XSLT"
 
 usage() {
-    local error
     echo "shxml xslt [opts] <xslt> <input-file...>
-    $error
-Options:
 
-    --backend <BACKEND>   Use specific backend <BACKEND>
-    --list-backends       List available backends
+    $SYNOPSIS
+
+    Options:
+
+        --backend <BACKEND>   Use specific backend <BACKEND>
+        --list-backends       List available backends
 "
 }
 
@@ -34,10 +35,8 @@ while [[ "$1" = -?* ]];do
     esac
     shift
 done
-if [[ -z "$1" ]];then
-    usage;
-    exit;
-fi
+[[ -z "$1" ]] && { usage; exit; }
+
 ## ## ARGUMENTS
 
 ##
@@ -45,7 +44,7 @@ fi
 ##
 XSLT="$1"
 if [[ ! -r "$XSLT" ]];then
-    _shxml_error "Cannot read XSLT script '$XSLT'"
+    shlog -l error -x 2 "Cannot read XSLT script '$XSLT'"
 fi
 shift
 
@@ -58,14 +57,14 @@ INPUT_FILES=("${_ARGS_INPUT_FILES[@]}")
 if [[ -z "$BACKEND" ]];then
     _shxml_backend_determine "$SHXML_BACKEND_XSLT" "${SHXML_BACKENDS_XSLT[@]}"
 fi
-_shxml_log 1 "XSLT BACKEND: '$BACKEND'"
-_shxml_log 1 "XSLT: '$XSLT'"
-_shxml_log 1 "INPUT_FILES: '${INPUT_FILES[*]}'"
+shlog -l trace "XSLT BACKEND: '$BACKEND'"
+shlog -l trace "XSLT: '$XSLT'"
+shlog -l trace "INPUT_FILES: '${INPUT_FILES[*]}'"
 case "$BACKEND" in
     saxon)
         typeset -a SAXON_FLAGS SAXON_ARGS
         for input_file in "${INPUT_FILES[@]}";do
-            _shxml_backend "$BACKEND" -- \
+            $SHXMLBINARY backend "$BACKEND" -- \
                 "Transform" \
                 "${SAXON_FLAGS[@]}" \
                 -xsl:"$XSLT" \
@@ -82,14 +81,14 @@ case "$BACKEND" in
         ;;
     xalan-cpp)
         for input_file in "${INPUT_FILES[@]}";do
-            _shxml_backend "$BACKEND" -- \
+            $SHXMLBINARY backend "$BACKEND" -- \
                 -xsl "$XSLT" \
                 -in "$input_file"
         done
         ;;
     xsltproc)
         for input_file in "${INPUT_FILES[@]}";do
-            _shxml_backend "$BACKEND" -- \
+            shxml-backend "$BACKEND" -- \
                 "$XSLT" \
                 "$input_file"
         done

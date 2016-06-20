@@ -10,18 +10,27 @@ source "$SHXMLSHARE/lib/common.bash"
 SHXML_BACKENDS_XSD=("xmlstarlet" "xmllint")
 SYNOPSIS="Validate XML against XSD"
 
+#man: ## USAGE
+#man:
+#man:     shxml xsd [options] <xsd> <input-file...>
+#man:
+#help: Usage: shxml xsd [opts] <xsd> <input-file...>
 usage() {
     echo "$SHXMLBINARY xsd [opts] <xsd> <input-file...>
 
-Options:
+    $SYNOPSIS
 
-    --backend <BACKEND>   Use specific backend <BACKEND>
-    --list-backends       List available backends
+    Options:
+
+        --backend <BACKEND>   Use specific backend <BACKEND>
+        --list-backends       List available backends
 "
 }
 
-## ## OPTIONS
-##
+#man: ## OPTIONS
+#man:
+#help: Options:
+#help:
 while [[ "$1" = -?* ]];do
     case "$1" in
         #help:--synopsis:Show the synopsis of this command
@@ -45,7 +54,7 @@ fi
 ##
 XSD="$1"
 if [[ ! -r "$XSD" ]];then
-    _shxml_error "Cannot read XSD script '$XSD'"
+    shlog -l error -x 2 "Cannot read XSD script '$XSD'"
 fi
 shift
 
@@ -58,9 +67,9 @@ INPUT_FILES=("${_ARGS_INPUT_FILES[@]}")
 if [[ -z "$BACKEND" ]];then
     _shxml_backend_determine "$SHXML_BACKEND_XSD" "${SHXML_BACKENDS_XSD[@]}"
 fi
-_shxml_log 1 "XSD BACKEND: '$BACKEND'"
-_shxml_log 1 "XSD: '$XSD'"
-_shxml_log 1 "INPUT_FILES: '${INPUT_FILES[*]}'"
+shlog -l trace "XSD BACKEND: '$BACKEND'"
+shlog -l trace "XSD: '$XSD'"
+shlog -l trace "INPUT_FILES: '${INPUT_FILES[*]}'"
 case "$BACKEND" in
     xmlstarlet)
         for input_file in "${INPUT_FILES[@]}";do

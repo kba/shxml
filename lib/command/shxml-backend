@@ -32,7 +32,7 @@ while [[ "$1" = -?* ]];do
         ##
         -h|--help) usage; exit ;;
         --synopsis) echo "$SYNOPSIS"; exit ;;
-        *) _shxml_error "Unknown option '$1' to $(basename "$0")"; exit ;;
+        *) shlog -l error -x 7 "Unknown option '$1'"; exit ;;
     esac
     shift
 done
@@ -46,10 +46,10 @@ if [[ -z "$BACKEND" ]];then
     usage
     exit
 elif [[ ! -e "$SHXMLSHARE/lib/backend/$BACKEND" ]] >/dev/null;then
-    _shxml_error "Unknown backend '$BACKEND'"
+    shlog -l error -x 9 "Unknown backend '$BACKEND'"
 fi
 shift
 
-_shxml_log 0 "BACKEND: '$BACKEND'"
-_shxml_log 0 "\$@: " "$@"
+shlog -l trace "BACKEND: '$BACKEND'"
+shlog -l trace "\$@: " "$@"
 _shxml_backend "$BACKEND" "$@"

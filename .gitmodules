@@ -1,0 +1,3 @@
+[submodule "lib/shlog"]
+	path = lib/shlog
+	url = https://github.com/kba/shlog

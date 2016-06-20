@@ -67,3 +67,6 @@ install: build jar README.md $(SCRIPT)
 
 check:
 	which unzip wget
+
+API.md: doc/API.md $(wildcard lib/*.bash)
+	shinclude -c xml doc/API.md > "$@"

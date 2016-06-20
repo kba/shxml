@@ -22,7 +22,7 @@ usage() {
     "
 }
 
-while [[ "$1" != "--" ]];do
+while [[ -n "$1" && "$1" != "--" ]];do
     case "$1" in
         ## --help
         --help) usage; exit ;;
@@ -32,13 +32,19 @@ while [[ "$1" != "--" ]];do
         --version) _shxml_backend "saxon" -- Version; exit;;
         ## --check-installed
         --check-installed) _shxml_mark_ok ; exit ;;
-        *) _shxml_error "Unknown option '$1' to $(basename "$0")" ;;
+        *) shlog -l error "Unknown option '$1'"; usage; exit 7 ;;
     esac
     shift
 done
-shift
+shift || { usage; exit; }
+[[ -z "$1" ]] && { usage; exit; }
+[[ "$1" != "Transform" && "$1" != "Query" ]] && {
+    shlog -l error "No such command: $1"
+    usage
+    exit 2
+}
 CLASS="net.sf.saxon.$1"; shift
 CLASSPATH="$SHXMLSHARE/jar/saxon9he.jar"
 
-_shxml_log 0 exec "$JAVACMD" "${JVM_OPTS[@]}" -classpath "$CLASSPATH" "$CLASS" "${SAXON_ARGS[@]}"
+shlog -l debug exec "$JAVACMD" "${JVM_OPTS[@]}" -classpath "$CLASSPATH" "$CLASS" "${SAXON_ARGS[@]}"
 exec "$JAVACMD" "${JVM_OPTS[@]}" -classpath "$CLASSPATH" "$CLASS" "$@"

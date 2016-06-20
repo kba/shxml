@@ -26,14 +26,14 @@ set_java() {
             JAVACMD="$JAVA_HOME/bin/java"
         fi
         if [ ! -x "$JAVACMD" ] ; then
-            _error "JAVA_HOME is set to an invalid directory: $JAVA_HOME
+            shlog -l error -x 2 "JAVA_HOME is set to an invalid directory: $JAVA_HOME
 
     Please set the JAVA_HOME variable in your environment to match the
     location of your Java installation."
         fi
     else
         JAVACMD="java"
-        which java >/dev/null 2>&1 || _error "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+        which java >/dev/null 2>&1 || shlog -l error -x 2 "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
 
     Please set the JAVA_HOME variable in your environment to match the
     location of your Java installation."

@@ -13,10 +13,12 @@ SYNOPSIS="Run xpath expression"
 usage() {
     echo "$SHXMLBINARY xpath <xpath> <input-file...>
 
-Options:
+    $SYNOPSIS
 
-    --backend <BACKEND>   Use specific backend <BACKEND>
-    --list-backends       List available backends
+    Options:
+
+        --backend <BACKEND>   Use specific backend <BACKEND>
+        --list-backends       List available backends
 "
 }
 
@@ -33,10 +35,7 @@ while [[ "$1" = -?* ]];do
     esac
     shift
 done
-if [[ -z "$1" ]];then
-    usage;
-    exit;
-fi
+[[ -z "$1" ]] && { usage; exit; }
 
 ## ## ARGUMENTS
 
@@ -55,9 +54,9 @@ INPUT_FILES=("${_ARGS_INPUT_FILES[@]}")
 if [[ -z "$BACKEND" ]];then
     _shxml_backend_determine "$SHXML_BACKEND_XPATH" "${SHXML_BACKENDS_XPATH[@]}"
 fi
-_shxml_log 1 "XPATH BACKEND: '$BACKEND'"
-_shxml_log 1 "XPATH: '$XPATH'"
-_shxml_log 1 "INPUT_FILES: '${INPUT_FILES[*]}'"
+shlog -l trace "XPATH BACKEND: '$BACKEND'"
+shlog -l trace "XPATH: '$XPATH'"
+shlog -l trace "INPUT_FILES: '${INPUT_FILES[*]}'"
 case "$BACKEND" in
     xmlstarlet)
         for input_file in "${INPUT_FILES[@]}";do

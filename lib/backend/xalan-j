@@ -10,17 +10,24 @@ source "$SHXMLSHARE/lib/java.bash"
 
 SYNOPSIS="Run Xalan-J JAR"
 
-while [[ "$1" != "--" ]];do
+usage () {
+    echo "Usage: $SHXMLBINARY backend xalan-j -- <args>
+
+    Run '$SHXMLBINARY backend xalan-j -- -h' for more help."
+}
+
+while [[ "$1" && "$1" != "--" ]];do
     case "$1" in
         ## --synopsis
         --synopsis) echo "$SYNOPSIS"; exit ;;
         ## --check-installed
         --check-installed) _shxml_mark_ok ; exit ;;
-        *) _shxml_error "Unknown option '$1' to $(basename "$0")" ;;
+        *) shlog -l error "Unknown option '$1'"; usage; exit 7 ;;
     esac
     shift
 done
+shift || { usage; exit; }
 CLASSPATH="$SHXMLSHARE/jar/xalan-serializer.jar:$SHXMLSHARE/jar/xalan.jar"
 
-_shxml_log 0 exec "$JAVACMD" "${JVM_OPTS[@]}" -cp "$SHXMLSHARE/jar/xalan-serializer.jar" -jar "$JAR" "$@"
+shlog -l trace exec "$JAVACMD" "${JVM_OPTS[@]}" -cp "$SHXMLSHARE/jar/xalan-serializer.jar" -jar "$JAR" "$@"
 exec "$JAVACMD" "${JVM_OPTS[@]}" -cp "$CLASSPATH" "org.apache.xalan.xslt.Process" "$@"

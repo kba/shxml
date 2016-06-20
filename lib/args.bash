@@ -17,12 +17,12 @@ _args_input_files_or_stdin() {
         _ARGS_INPUT_FILES+=(/dev/stdin)
         shift
         if [[ ! -z "$1" ]];then
-            _error "Don't mix input files and STDIN."
+            shlog -l error -x 10 "Don't mix input files and STDIN."
         fi
     fi
     while [[ ! -z "$1" ]];do
         if [[ ! -e "$1" ]];then
-            _error "No such file: '$1'"
+            shlog -l error -x 10 "No such file: '$1'"
         fi
         _ARGS_INPUT_FILES+=("$1")
         shift

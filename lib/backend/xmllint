@@ -11,7 +11,15 @@ SYNOPSIS="Run xmllint"
 
 SHXML_XMLLINT="${SHXML_XMLLINT:-xmllint}"
 
-while [[ "$1" != "--" ]];do
+usage () {
+    echo "Usage: $SHXMLBINARY backend xmllint [opts] -- <args>
+
+    $SYNOPSIS
+
+    Run '$SHXMLBINARY backend xmllint -- --help' for more help"
+}
+
+while [[ "$1" && "$1" != "--" ]];do
     case "$1" in
         ## ### --synopsis
         --synopsis) echo "$SYNOPSIS"; exit ;;
@@ -23,11 +31,11 @@ while [[ "$1" != "--" ]];do
             fi
             _shxml_mark_notok; exit 1
             ;;
-        *) _shxml_error "Unknown option '$1' to $(basename "$0")" ;;
+        *) shlog -l error "Unknown option '$1'"; usage; exit 7 ;;
     esac
     shift
 done
-shift
+shift || { usage; exit; }
 
-_shxml_log 0 exec "$SHXML_XMLLINT" "$@"
+shlog -l trace exec "$SHXML_XMLLINT" "$@"
 exec "$SHXML_XMLLINT" "$@"

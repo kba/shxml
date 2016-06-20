@@ -17,11 +17,13 @@ set -e
 
 ## Prepend `$SHXMLSHARE/libcommand to `$PATH`
 ##
-export PATH="$SHXMLSHARE/lib/command:$PATH"
+export PATH="$(dirname "$0"):$SHXMLSHARE/lib/command:$PATH"
 ## Source libs
 ##
-## * `logging.bash`
-source "$SHXMLSHARE/lib/logging.bash"
+## * `shlog/shlog.sh`
+# if [[ -z "$SHLOG_INITIALIZED" ]];then
+    source "$SHXMLSHARE/lib/shlog/shlog.sh"
+# fi
 ## * `args.bash`
 source "$SHXMLSHARE/lib/args.bash"
 ## * `utils.bash`
@@ -39,7 +41,7 @@ source "$SHXMLSHARE/lib/backend.bash"
 for profile in "/etc/default/shxml" "$HOME/.shxmlrc";do
     if [[ -f "$profile" ]];then 
         source "$profile"
-        _shxml_log 1 "Sourced '$profile'"
+        shlog info "Sourced '$profile'"
     fi
     true
 done

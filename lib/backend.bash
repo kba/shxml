@@ -7,7 +7,7 @@ _shxml_backend() {
 }
 
 _shxml_backend_check_installed() {
-    local cmd
+    local cmd backends
     for cmd in "$@";do
         backends+="       $(_shxml_backend "$cmd" --check-installed)\t${cmd} \t $(_shxml_backend "$cmd" --synopsis)\n"
     done
@@ -17,16 +17,16 @@ _shxml_backend_check_installed() {
 _shxml_backend_determine() {
     BACKEND="$1"; shift;
     if [[ -n "$BACKEND" ]];then
-        _shxml_log 0 "Use '$cmd' backend for '$cmd' (env var)"
+        shlog -l debug "Use '$cmd' backend for '$cmd' (env var)"
         return
     fi
     for cmd in "$@";do
         if (_shxml_backend "$cmd" --check-installed >/dev/null);then
-            _shxml_log 0 "Use '$cmd' backend (first in list installed)"
+            shlog -l debug "Use '$cmd' backend (first in list installed)"
             BACKEND="$cmd"
             return
         fi
     done
-    _shxml_error "No usable backend installed"
+    shlog -l error -x 2 "No usable backend installed"
 }
 
