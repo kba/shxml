@@ -12,16 +12,20 @@ SAXON_HE_URL = $(MVN_URL)/net/sf/saxon/Saxon-HE/$(SAXON_HE_VERSION)/Saxon-HE-$(S
 XALAN_URL = $(MVN_URL)/xalan/xalan/$(XALAN_VERSION)/xalan-$(XALAN_VERSION).jar
 XALANSER_URL = $(MVN_URL)/xalan/serializer/$(XALAN_VERSION)/serializer-$(XALAN_VERSION).jar
 
-SCRIPT=saxon-cli
+PATH := lib/shinclude:$(PATH)
+
+SCRIPT=shxml
 VERSION=0.0.1
 
 PREFIX=/usr/local
 SHAREDIR=$(PREFIX)/share/$(SCRIPT)
 BINDIR=$(PREFIX)/bin
 
-BINARIES += $(shell find bin -type f|sed 's,^,build/,'|sed 's,\.sh$$,,')
-
 .PHONY: README.md
+
+#
+# Java libs
+#
 
 jar: jar/saxon9he.jar jar/xalan.jar jar/xalan-serializer.jar
 
@@ -34,39 +38,50 @@ jar/xalan.jar:
 jar/xalan-serializer.jar:
 	$(MKDIR) jar && $(WGET) -O "$@" "$(XALANSER_URL)"
 
-# Remove the compiled file and ZIP
+# Remove the JARs
 clean:
 	$(RM) $(SCRIPT)
-	$(RM) $(SAXON_HE_ZIP)
+	$(RM) jar
 
 # Include/Render/Tocify the README
 README.md:
 	shinclude -i -c xml README.md
 
-build: $(BINARIES) build/common.sh
+build: $(wildcard lib/backend/* lib/command/* lib/*)
 
-build/common.sh: common.sh
-	$(MKDIR) $(dir $@)
-	shinclude -c pound "$<" > "$@"
+# build/common.sh: common.sh
+#     $(MKDIR) $(dir $@)
+#     shinclude -c pound "$<" > "$@"
 
-# Set SHAREDIR and expand shinclude templates
-build/bin/%: bin/%.sh
-	$(MKDIR) $(dir $@)
-	sed 's,^SHAREDIR=.*,SHAREDIR="$(SHAREDIR)",' "$<" \
+# # Set SHAREDIR and expand shinclude templates
+# build/bin/%: bin/%.sh
+#     $(MKDIR) $(dir $@)
+#     sed 's,^SHAREDIR=.*,SHAREDIR="$(SHAREDIR)",' "$<" \
+#         | shinclude -c pound - \
+#         > "$@"
+
+install: jar README.md bin/$(SCRIPT)
+	$(MKDIR) $(BINDIR)
+	sed 's,^SHXMLSHARE=.*,SHXMLSHARE="$(SHAREDIR)",' "bin/$(SCRIPT)" \
 		| shinclude -c pound - \
-		> "$@"
-
-install: build jar README.md $(SCRIPT)
-	$(CP) $(SCRIPT) $(BINDIR)/$(SCRIPT)
+		> "$(BINDIR)/$(SCRIPT)"
 	chmod a+x $(BINDIR)/$(SCRIPT)
 	$(MKDIR) $(SHAREDIR)
 	$(CP) -t $(SHAREDIR) \
 		LICENSE \
 		README.md \
-		saxon9he.jar
+		lib \
+		jar
 
-check:
-	which unzip wget
+uninstall:
+	$(RM) $(BINDIR)/$(SCRIPT)
+	$(RM) $(SHAREDIR)
+
+
+#     $(CP) $(SCRIPT) $(BINDIR)/$(SCRIPT)
 
 API.md: doc/API.md $(wildcard lib/*.bash)
 	shinclude -c xml doc/API.md > "$@"
+
+docker:
+	docker build -t 'kbai/shxml' .

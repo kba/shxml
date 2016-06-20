@@ -17,5 +17,5 @@ _shxml_mark_ok() {
     echo -ne "\e[32;1m✓ \e[0m"
 }
 _shxml_mark_notok() {
-    echo -ne "\e[31;1m✗✓ \e[0m"
+    echo -ne "\e[31;1m✗ \e[0m"
 }
