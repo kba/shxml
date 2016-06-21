@@ -15,20 +15,19 @@
 ##
 set -e
 
-## Prepend `$SHXMLSHARE/libcommand to `$PATH`
+## * Prepend `$SHXMLSHARE/lib/command to `$PATH`
+## * Prepend `$SHXMLSHARE/deps/bin to `$PATH`
 ##
-export PATH="$(dirname "$0"):$SHXMLSHARE/lib/command:$PATH"
+export PATH="$SHXMLSHARE/deps/bin:$SHXMLSHARE/lib/command:$PATH"
 ## Source libs
 ##
-## * `shlog/shlog.sh`
-# if [[ -z "$SHLOG_INITIALIZED" ]];then
-    source "$SHXMLSHARE/lib/shlog/shlog.sh"
-# fi
-## * `args.bash`
+## * [`shlog`](https://github.com/kba/shlog)
+source "$(which shlog)"
+## * [`args.bash`](./lib/args.bash)
 source "$SHXMLSHARE/lib/args.bash"
-## * `utils.bash`
+## * [`utils.bash`](./lib/utils.bash)
 source "$SHXMLSHARE/lib/utils.bash"
-## * `backend.bash`
+## * [`backend.bash`](./lib/backend.bash)
 source "$SHXMLSHARE/lib/backend.bash"
 
 ## Load configurations

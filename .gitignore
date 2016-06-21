@@ -1,4 +1,1 @@
-saxon9he.jar
-*.zip
-build/
-jar/*
+build-deps

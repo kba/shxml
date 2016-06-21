@@ -1,6 +1,3 @@
 [submodule "lib/shlog"]
-	path = lib/shlog
+	path = deps/shlog
 	url = https://github.com/kba/shlog
-[submodule "lib/shinclude"]
-	path = lib/shinclude
-	url = https://github.com/kba/shinclude
