@@ -25,7 +25,7 @@ PREFIX=/usr/local
 SHAREDIR=$(PREFIX)/share/$(SCRIPT)
 BINDIR=$(PREFIX)/bin
 
-.PHONY: README.md
+.PHONY: test
 
 #
 # Dependencies
@@ -58,7 +58,7 @@ build-deps/shinclude:
 build: build-deps deps $(wildcard lib/backend/* lib/command/* lib/*)
 
 # Include/Render/Tocify the README
-README.md:
+README.md: doc/README.md $(wildcard src/*)
 	shinclude -c xml doc/README.md > README.md
 API.md: doc/API.md $(wildcard lib/*.bash)
 	shinclude -c xml doc/API.md > "$@"
