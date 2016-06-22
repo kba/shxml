@@ -6,7 +6,7 @@ _shxml_in_array () {
 
 _shxml_exec () {
     shlog -l debug -m exec "$@"
-    local name="$*"
+    local name="$1"
     shlog::profile "$name"
     # shellcheck disable=2064
     "$@" 2> >(shlog::pipe -l warn -m "backend-$BACKEND")

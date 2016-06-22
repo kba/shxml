@@ -34,10 +34,10 @@ The last XML CLI you'll need
             --trace		Enable tracing
     
         Commands:
-            backend    Run a backend directly
             xpath      Run xpath expression
-            xslt       Transform XML with XSLT
+            backend    Run a backend directly
             xsd        Validate XML against XSD
+            xslt       Transform XML with XSLT
     
         Run 'shxml <command> --help to get command-specific help
 

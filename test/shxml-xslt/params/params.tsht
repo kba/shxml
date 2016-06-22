@@ -1,0 +1,12 @@
+#!/usr/bin/env tsht
+
+PATH="../../../bin:$PATH"
+type -a shxml
+use colordiff
+
+echo "<x/>" | shxml xslt \
+    --backend xsltproc \
+    --param "param1" "yay" \
+    --param "string-param1" "'yay2'" \
+    --output-param omit-xml-declaration yes \
+    ../../samples/xsl/xsl-with-params.xsl -
