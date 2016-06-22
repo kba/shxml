@@ -20,12 +20,10 @@ set -e
 ##
 export PATH
 PATH="$SHXMLSHARE/bin:$PATH"
-# PATH="$SHXMLSHARE/deps/bin:$PATH"
 PATH="$SHXMLSHARE/lib/command:$PATH"
 ## Source libs
 ##
 ## * [`shlog`](https://github.com/kba/shlog)
-# source "$(which shlog)"
 source "$SHXMLSHARE/deps/bin/shlog"
 ## * [`backend.bash`](./lib/config.bash)
 source "$SHXMLSHARE/lib/config.bash"

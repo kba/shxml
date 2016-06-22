@@ -1,12 +1,20 @@
 # shxml
 
-<!-- BEGIN-BANNER -f "standard" -w "<pre>" "The last XML CLI you'll need</pre>" "shxml" -->
+<!-- BEGIN-BANNER -f "standard" -w "\`\`\`" "The last XML CLI you'll need\n\`\`\`" "shxml" -->
 <!-- END-BANNER -->
+
+<!-- BEGIN-MARKDOWN-TOC -->
+<!-- END-MARKDOWN-TOC -->
 
 ## USAGE
 
 <!-- BEGIN-EVAL ./bin/shxml --help |sed 's,^,    ,' -->
 <!-- END-EVAL -->
+
+## CONFIGURATION
+
+<!-- BEGIN-RENDER lib/config.bash -->
+<!-- END-RENDER -->
 
 ## CREDITS
 

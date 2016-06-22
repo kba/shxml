@@ -1,15 +1,28 @@
 # shxml
 
-<!-- BEGIN-BANNER -f "standard" -w "<pre>" "The last XML CLI you'll need</pre>" "shxml" -->
-<pre>
+<!-- BEGIN-BANNER -f "standard" -w "\`\`\`" "The last XML CLI you'll need\n\`\`\`" "shxml" -->
+```
      _                    _ 
  ___| |__ __  ___ __ ___ | |
 / __| '_ \\ \/ / '_ ` _ \| |
 \__ \ | | |>  <| | | | | | |
 |___/_| |_/_/\_\_| |_| |_|_|
-The last XML CLI you'll need</pre>
+The last XML CLI you'll need
+```
 
 <!-- END-BANNER -->
+
+<!-- BEGIN-MARKDOWN-TOC -->
+* [USAGE](#usage)
+* [CONFIGURATION](#configuration)
+	* [SHXML_USE_DRIP](#shxml_use_drip)
+	* [SHXML_INCREASE_ULIMIT](#shxml_increase_ulimit)
+	* [SHXML_BACKEND_XSLT](#shxml_backend_xslt)
+* [CREDITS](#credits)
+	* [Bundled Software](#bundled-software)
+	* [Build time install](#build-time-install)
+
+<!-- END-MARKDOWN-TOC -->
 
 ## USAGE
 
@@ -29,6 +42,32 @@ The last XML CLI you'll need</pre>
         Run 'shxml <command> --help to get command-specific help
 
 <!-- END-EVAL -->
+
+## CONFIGURATION
+
+<!-- BEGIN-RENDER lib/config.bash -->
+### SHXML_USE_DRIP
+
+Whether to use drip instead of the JVM directly
+
+This can make subsequent JVM startups faster but can lead to hangs.
+
+Default: `false`
+
+### SHXML_INCREASE_ULIMIT
+
+Whether to try to increase ulimit
+
+Default: `false`
+
+### SHXML_BACKEND_XSLT
+
+Backend to use for XSLT. Overrides the default mechanism but not
+a backend passed on the command line
+
+Default: `(unset)`
+
+<!-- END-RENDER -->
 
 ## CREDITS
 
