@@ -29,5 +29,4 @@ done
 shift || { usage; exit; }
 CLASSPATH="$SHXMLSHARE/deps/jar/xalan-serializer.jar:$SHXMLSHARE/deps/jar/xalan.jar"
 
-shlog -l trace exec "$JAVACMD" "${JVM_OPTS[@]}" -cp "$SHXMLSHARE/jar/xalan-serializer.jar" -jar "$JAR" "$@"
-exec "$JAVACMD" "${JVM_OPTS[@]}" -cp "$CLASSPATH" "org.apache.xalan.xslt.Process" "$@"
+_shxml_exec  "$JAVACMD" "${JVM_OPTS[@]}" -cp "$CLASSPATH" "org.apache.xalan.xslt.Process" "$@"

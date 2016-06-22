@@ -37,5 +37,4 @@ while [[ "$1" && "$1" != "--" ]];do
 done
 shift || { usage; exit; }
 
-shlog -l trace exec "$SHXML_XMLSTARLET" "$@"
-exec "$SHXML_XMLSTARLET" "$@"
+_shxml_exec "$SHXML_XMLSTARLET" "$@"

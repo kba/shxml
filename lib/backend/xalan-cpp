@@ -6,7 +6,6 @@ if [[ -z "$SHXMLSHARE" ]];then
     exit 142
 fi
 source "$SHXMLSHARE/lib/common.bash"
-source "$SHXMLSHARE/lib/java.bash"
 
 SYNOPSIS="Run Xalan-C++"
 
@@ -37,5 +36,4 @@ while [[ "$1"  && "$1" != "--" ]];do
 done
 shift || { usage; exit; } 
 
-shlog -l trace exec "$SHXML_XALANCPP" "$@"
-exec "$SHXML_XALANCPP" "$@"
+_shxml_exec "$SHXML_XALANCPP" "$@"

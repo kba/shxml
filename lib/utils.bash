@@ -4,6 +4,17 @@ _shxml_in_array () {
   return 1
 }
 
+_shxml_exec () {
+    shlog -l debug -m exec "$@"
+    local name="$*"
+    shlog::profile "$name"
+    # shellcheck disable=2064
+    "$@" 2> >(shlog::pipe -l warn -m "backend-$BACKEND")
+    local ret=$?
+    shlog::profile -log "$name"
+    exit $ret
+}
+
 # _shxml_list_with_default() {
 #     local def="$1" prefix
 #     shift

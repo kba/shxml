@@ -12,6 +12,7 @@ case "`uname`" in
     Darwin* ) darwin=true ;;
 esac
 
+
 # Determine the Java command to use to start the JVM.
 set_java() {
     # For Cygwin, ensure paths are in UNIX format before anything is touched.
@@ -52,13 +53,19 @@ set_ulimit() {
             fi
             ulimit -n "$MAX_FD"
             if [ $? -ne 0 ] ; then
-                _debug 0 "Could not set maximum file descriptor limit: $MAX_FD"
+                shlog -l warn "Could not set maximum file descriptor limit: $MAX_FD"
             fi
         else
-            _debug 0 "Could not query maximum file descriptor limit: $MAX_FD_LIMIT"
+            hlog -l warn"Could not query maximum file descriptor limit: $MAX_FD_LIMIT"
         fi
     fi
 }
 
-set_java
-set_ulimit
+if [[ "$SHXML_USE_DRIP" = true ]];then
+    JAVACMD="$SHXMLSHARE/deps/drip/bin/drip"
+else
+    set_java
+fi
+if [[ "$SHXML_INCREASE_ULIMIT" = true ]];then
+    set_ulimit
+fi

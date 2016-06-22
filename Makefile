@@ -8,57 +8,74 @@ CP = cp -rva
 RM = rm -rfv
 UNZIP = unzip -u
 WGET = wget
+GIT = git
 MKDIR = mkdir -p
-SHINCLUDE = build-deps/shinclude/dist/shinclude
-
-MVN_URL = http://central.maven.org/maven2
-SAXON_HE_URL = $(MVN_URL)/net/sf/saxon/Saxon-HE/$(SAXON_HE_VERSION)/Saxon-HE-$(SAXON_HE_VERSION).jar
-XALAN_URL = $(MVN_URL)/xalan/xalan/$(XALAN_VERSION)/xalan-$(XALAN_VERSION).jar
-XALANSER_URL = $(MVN_URL)/xalan/serializer/$(XALAN_VERSION)/serializer-$(XALAN_VERSION).jar
+SHINCLUDE = build-deps/shinclude/shinclude
+WGET = wget
 
 PATH := $(PATH):./build-deps/shinclude
-
-SCRIPT=shxml
-VERSION=0.0.1
 
 PREFIX=/usr/local
 SHAREDIR=$(PREFIX)/share/$(SCRIPT)
 BINDIR=$(PREFIX)/bin
 
-.PHONY: test
+.PHONY: test all docs
 
-#
+all: build-deps deps docs $(wildcard lib/backend/* lib/command/* lib/*)
+
+#------------------------------------------------------------------------------
 # Dependencies
-#
-deps: deps/jar deps/bin
 #  deps/jar: Java libs
+#  deps/bin: Shell scrips
+#------------------------------------------------------------------------------
+deps: deps/jar deps/bin deps/drip
+
+#------------------------------------------------------------------------------
 deps/jar: deps/jar/saxon9he.jar deps/jar/xalan.jar deps/jar/xalan-serializer.jar
+
+MVN_URL = http://central.maven.org/maven2
+
+SAXON_HE_URL = $(MVN_URL)/net/sf/saxon/Saxon-HE/$(SAXON_HE_VERSION)/Saxon-HE-$(SAXON_HE_VERSION).jar
 deps/jar/saxon9he.jar:
 	$(MKDIR) $(dir $@) && $(WGET) -O "$@" "$(SAXON_HE_URL)"
+
+XALAN_URL = $(MVN_URL)/xalan/xalan/$(XALAN_VERSION)/xalan-$(XALAN_VERSION).jar
 deps/jar/xalan.jar:
 	$(MKDIR) $(dir $@) && $(WGET) -O "$@" "$(XALAN_URL)"
+
+XALANSER_URL = $(MVN_URL)/xalan/serializer/$(XALAN_VERSION)/serializer-$(XALAN_VERSION).jar
 deps/jar/xalan-serializer.jar:
 	$(MKDIR) $(dir $@) && $(WGET) -O "$@" "$(XALANSER_URL)"
-#  deps/bin: Shell scrips
-deps/bin: deps/bin/shlog
+
+#------------------------------------------------------------------------------
+deps/bin: deps/bin/shlog 
+
+SHLOG_URL = https://rawgit.com/kba/shlog/master/shlog
 deps/bin/shlog:
-	$(MKDIR) "$(dir $@)" && wget -O "$@" "https://rawgit.com/kba/shlog/master/shlog" && chmod a+x "$@"
+	$(MKDIR) "$(dir $@)" && wget -O "$@" "$(SHLOG_URL)" && chmod a+x "$@"
 
-#
+#------------------------------------------------------------------------------
+DRIP_URL = https://github.com/ninjudd/drip
+deps/drip:
+	$(GIT) clone "$(DRIP_URL)" "$@"
+	$(MAKE) -C "$@"
+
+#------------------------------------------------------------------------------
 # Build dependencies
-#
+#------------------------------------------------------------------------------
 build-deps: build-deps/shinclude
+
+SHINCLUDE_URL = https://github.com/kba/shinclude
 build-deps/shinclude:
-	git clone 'https://github.com/kba/shinclude' "$@"
+	git clone "$(SHINCLUDE_URL)" "$@"
 
-
-#
-# Build
-#
-build: build-deps deps $(wildcard lib/backend/* lib/command/* lib/*)
+#------------------------------------------------------------------------------
+# Documentation
+#------------------------------------------------------------------------------
+docs: README.md API.md
 
 # Include/Render/Tocify the README
-README.md: doc/README.md $(wildcard src/*)
+README.md: doc/README.md 
 	shinclude -c xml doc/README.md > README.md
 API.md: doc/API.md $(wildcard lib/*.bash)
 	shinclude -c xml doc/API.md > "$@"
@@ -75,10 +92,10 @@ API.md: doc/API.md $(wildcard lib/*.bash)
 #         | shinclude -c pound - \
 #         > "$@"
 
-#
+#------------------------------------------------------------------------------
 # Install
-#
-install: deps README.md bin/$(SCRIPT)
+#------------------------------------------------------------------------------
+install: build-deps deps README.md bin/$(SCRIPT)
 	$(MKDIR) $(BINDIR)
 	sed 's,^SHXMLSHARE=.*,SHXMLSHARE="$(SHAREDIR)",' "bin/$(SCRIPT)" \
 		| $(SHINCLUDE) -c pound - \
@@ -88,31 +105,35 @@ install: deps README.md bin/$(SCRIPT)
 	$(CP) -t $(SHAREDIR) \
 		LICENSE \
 		README.md \
-		deps \
 		lib \
 		deps
 
-#
+#------------------------------------------------------------------------------
 # Uninstall
-#
+#------------------------------------------------------------------------------
 uninstall:
 	$(RM) $(BINDIR)/$(SCRIPT)
 	$(RM) $(SHAREDIR)
 
-#
+#------------------------------------------------------------------------------
 # Clean
-#
+#------------------------------------------------------------------------------
+realclean:
+	$(RM) build-deps deps
+	$(RM) test/.tsht test/tsht
+	$(RM) README.md API.md
 
-clean:
-	$(RM) $(SCRIPT)
-	$(RM) deps
+#------------------------------------------------------------------------------
+# Test
+#------------------------------------------------------------------------------
+TSHT_URL = https://rawgit.com/kba/tsht/master/tsht
+test/tsht:
+	$(MKDIR) test && $(WGET) -O "$@" "$(TSHT_URL)" && chmod a+x "$@"
+test: test/tsht
+	./test/tsht
 
-realclean: clean
-	$(RM) README.md build-deps deps
-
-#
+#------------------------------------------------------------------------------
 # Docker
-#
-
+#------------------------------------------------------------------------------
 docker:
 	docker build -t 'kbai/shxml' .

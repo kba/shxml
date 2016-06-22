@@ -1,0 +1,9 @@
+#!/usr/bin/env tsht
+
+PATH="../bin:$PATH"
+
+exec_ok shxml
+exec_ok shxml backend
+exec_ok shxml xslt
+exec_ok shxml xsd
+exec_ok shxml xpath

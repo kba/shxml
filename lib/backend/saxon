@@ -46,5 +46,4 @@ shift || { usage; exit; }
 CLASS="net.sf.saxon.$1"; shift
 CLASSPATH="$SHXMLSHARE/deps/jar/saxon9he.jar"
 
-shlog -l debug exec "$JAVACMD" "${JVM_OPTS[@]}" -classpath "$CLASSPATH" "$CLASS" "${SAXON_ARGS[@]}"
-exec "$JAVACMD" "${JVM_OPTS[@]}" -classpath "$CLASSPATH" "$CLASS" "$@"
+_shxml_exec "$JAVACMD" "${JVM_OPTS[@]}" -classpath "$CLASSPATH" "$CLASS" "$@"

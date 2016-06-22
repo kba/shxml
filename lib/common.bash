@@ -18,11 +18,17 @@ set -e
 ## * Prepend `$SHXMLSHARE/lib/command to `$PATH`
 ## * Prepend `$SHXMLSHARE/deps/bin to `$PATH`
 ##
-export PATH="$SHXMLSHARE/deps/bin:$SHXMLSHARE/lib/command:$PATH"
+export PATH
+PATH="$SHXMLSHARE/bin:$PATH"
+# PATH="$SHXMLSHARE/deps/bin:$PATH"
+PATH="$SHXMLSHARE/lib/command:$PATH"
 ## Source libs
 ##
 ## * [`shlog`](https://github.com/kba/shlog)
-source "$(which shlog)"
+# source "$(which shlog)"
+source "$SHXMLSHARE/deps/bin/shlog"
+## * [`backend.bash`](./lib/config.bash)
+source "$SHXMLSHARE/lib/config.bash"
 ## * [`args.bash`](./lib/args.bash)
 source "$SHXMLSHARE/lib/args.bash"
 ## * [`utils.bash`](./lib/utils.bash)

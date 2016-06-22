@@ -1,1 +1,4 @@
 build-deps
+deps/drip
+test/tsht
+test/.tsht
