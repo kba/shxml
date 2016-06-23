@@ -1,0 +1,11 @@
+#!/usr/bin/env tsht
+
+PATH="../../../bin:$PATH"
+
+expected="<params><param1>foo</param1><param2>bar</param2></params>"
+
+for backend in saxon xsltproc;do
+    output=$(echo '<x/>' \
+        | shxml xslt --backend "$backend" --param param1 "foo" -p param2 bar test-params.xsl -)
+    equals "$output" "$expected" "params - $backend"
+done

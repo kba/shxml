@@ -50,6 +50,7 @@ elif [[ ! -e "$SHXMLSHARE/lib/backend/$BACKEND" ]] >/dev/null;then
 fi
 shift
 
-shlog -l trace "BACKEND: '$BACKEND'"
-shlog -l trace "\$@: " "$@"
+shlog -l trace -d BACKEND
+declare -a args=("$@")
+shlog -l trace -d args
 _shxml_backend "$BACKEND" "$@"

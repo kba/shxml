@@ -10,6 +10,8 @@ source "$SHXMLSHARE/lib/common.bash"
 SHXML_BACKENDS_XSLT=("saxon" "xsltproc" "xalan-cpp" "xalan-j" "xmlstarlet")
 SYNOPSIS="Transform XML with XSLT"
 
+declare -A SHXML_XSLT_PARAMS
+
 usage() {
     echo "shxml xslt [opts] <xslt> <input-file...>
 
@@ -17,6 +19,7 @@ usage() {
 
     Options:
 
+        -p --param NAME VALUE Set parameter NAME to VALUE
         --backend <BACKEND>   Use specific backend <BACKEND>
         --list-backends       List available backends
 "
@@ -28,6 +31,7 @@ while [[ "$1" = -?* ]];do
     case "$1" in
         #help:--synopsis:Show the synopsis of this command
         --synopsis) echo "$SYNOPSIS"; exit ;;
+        -p|--param) SHXML_XSLT_PARAMS[$2]="$3"; shift; shift ;;
         --backend) BACKEND="$2"; shift ;;
         --list-backends)
             _shxml_backend_check_installed "${SHXML_BACKENDS_XSLT[@]}"
@@ -57,16 +61,19 @@ INPUT_FILES=("${_ARGS_INPUT_FILES[@]}")
 if [[ -z "$BACKEND" ]];then
     _shxml_backend_determine "$SHXML_BACKEND_XSLT" "${SHXML_BACKENDS_XSLT[@]}"
 fi
-shlog -l trace "XSLT BACKEND: '$BACKEND'"
-shlog -l trace "XSLT: '$XSLT'"
-shlog -l trace "INPUT_FILES: '${INPUT_FILES[*]}'"
+shlog -l trace -d BACKEND
+shlog -l trace -d XSLT
+shlog -l trace -d INPUT_FILES
 case "$BACKEND" in
     saxon)
-        typeset -a SAXON_FLAGS SAXON_ARGS
+        typeset -a SAXON_OPTS SAXON_ARGS
+        for k in "${!SHXML_XSLT_PARAMS[@]}";do
+            SAXON_ARGS+=("$k=${SHXML_XSLT_PARAMS[$k]}")
+        done
         for input_file in "${INPUT_FILES[@]}";do
-            $SHXMLBINARY backend "$BACKEND" -- \
-                "Transform" \
-                "${SAXON_FLAGS[@]}" \
+            $SHXMLBINARY backend "$BACKEND" -- "Transform" \
+                "${SAXON_OPTS[@]}" \
+                -versionmsg:off \
                 -xsl:"$XSLT" \
                 -s:"$input_file" \
                 "${SAXON_ARGS[@]}"
@@ -87,8 +94,13 @@ case "$BACKEND" in
         done
         ;;
     xsltproc)
+        declare -a XSLTPROC_OPTS
+        for k in "${!SHXML_XSLT_PARAMS[@]}";do
+            XSLTPROC_OPTS+=("--stringparam" "$k" "${SHXML_XSLT_PARAMS[$k]}")
+        done
         for input_file in "${INPUT_FILES[@]}";do
             shxml-backend "$BACKEND" -- \
+                "${XSLTPROC_OPTS[@]}" \
                 "$XSLT" \
                 "$input_file"
         done
